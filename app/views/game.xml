@@ -1,0 +1,22 @@
+<Alloy>
+	<View id="gameHeader" class="gameHeader">
+		<Button id="backButton"></Button>
+		<Label id="exitLabel"></Label>
+		<Label id="labelAnswered"></Label>
+	</View>
+	
+	<View id="gameView" class="gameView">
+		<Label id="questionLabel" class="questionLabel"></Label>
+		<Button id="answer1" class="answerButton"></Button>
+		<Button id="answer2" class="answerButton"></Button>
+		<Button id="answer3" class="answerButton"></Button>
+		<Label id="timer" class="timer"></Label>
+	</View>
+	<View id="gameViewBack" class="gameView">
+		<Label id="questionLabelBack" class="questionLabel"></Label>
+		<Button id="answer1Back" class="answerButton"></Button>
+		<Button id="answer2Back" class="answerButton"></Button>
+		<Button id="answer3Back" class="answerButton"></Button>
+		<Label id="timerBack" class="timer"></Label>
+	</View>
+</Alloy>

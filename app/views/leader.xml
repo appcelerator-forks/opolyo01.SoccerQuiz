@@ -1,0 +1,6 @@
+<Alloy>
+	<View id="gameView">
+	</View>
+	<View id="gameViewBack">
+	</View>
+</Alloy>

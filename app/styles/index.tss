@@ -1,0 +1,29 @@
+"#headingLabel":{
+	"top": 20,
+	"color": "#fff",
+	left: 10,
+	right:10,
+	style:0,
+	font:{fontWeight:"bold", fontSize:24}
+},
+"#homeView": {
+  backgroundColor: "#000",
+  layout: "vertical",
+  title: "Home"
+},
+"#homeWindow":{
+	backgroundColor: "#000"
+},
+"#play":{
+	"top": 40
+},
+".homeButton" : {
+    top:10,
+	left: 10,
+	right:10,
+	style:0,
+	backgroundColor: "#B20838",
+	height: 43,
+	font:{fontWeight:"bold", fontSize:24}
+}
+	

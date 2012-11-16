@@ -1,0 +1,28 @@
+"#goBack":{
+	top: 40
+},
+"#questionLabel":{
+	top: 20
+},
+".answerButton":{
+	top:10,
+	width: 200,
+	height: 30,
+	background: "#abc"
+},
+"#gameView": {
+  backgroundColor: "#fff",
+  layout: "vertical",
+  title: "Game",
+  height: 480,
+  width: 320,
+  left: 0
+},
+"#gameViewBack": {
+  backgroundColor: "#fff",
+  layout: "vertical",
+  title: "Game",
+  height: 480,
+  width: 320,
+  left: -320
+}

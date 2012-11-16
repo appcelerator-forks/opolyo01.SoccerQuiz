@@ -1,0 +1,9 @@
+<Alloy>
+  <Window id="homeWindow" exitOnClose="true">
+  	<View id="homeView">
+	  	<Label id="headingLabel">Test your knowledge of soccer with this quiz.</Label>
+	    <Button id="play" class="homeButton">Play</Button>
+	    <Button id="leaderboards" class="homeButton">Leaders</Button>
+	</View>
+  </Window>
+</Alloy>

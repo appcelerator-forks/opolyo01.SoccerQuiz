@@ -1,0 +1,78 @@
+".homeButton" : {
+    top:40,
+	left: 10,
+	right:10,
+	style:0,
+	backgroundColor: "#484848",
+	height: 43,
+	font:{fontWeight:"bold", fontSize:24}
+},
+"#backButton":{
+	height: 40, 
+	width: 40, 
+	left: 20, 
+	top: 25, 
+	image: "/images/back.png"
+},
+"#exitLabel":{ 
+	top: 25, 
+	height: 40, 
+	textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT, 
+	font: {fontSize: 24,fontWeight: "bold"}, 
+	color: "#FFF", 
+	text: "Exit", 
+	left: 70, 
+	right: 160 
+},
+".timer":{
+	top: 50,
+	textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER, 
+	font: {fontSize: 20,fontWeight: "bold"}, 
+	color: "#FFF",
+	height: 40,
+	text: "10 out of 10 seconds remain"
+},
+"#labelAnswered":{
+	width: 200, 
+	top: 25, 
+	right:20,
+	height: 40, 
+	textAlign: Ti.UI.TEXT_ALIGNMENT_RIGHT, 
+	font: {fontSize: 18,fontWeight: "bold"}, 
+	color: "#FFF", 
+	text: "0 of 0 correct"
+},
+".questionLabel":{
+	top: 20,
+	color: "#FFF",
+	font:{fontWeight:"bold", fontSize:20}
+},
+".answerButton":{
+	top:10,
+	left: 10,
+	right:10,
+	style:0,
+	backgroundColor: "#B20838",
+	height: 43,
+	font:{fontWeight:"bold", fontSize:24},
+},
+".gameView": {
+  top: 91,
+  backgroundColor: "#000",
+  layout: "vertical",
+  title: "Game",
+  height: 389,
+  width: 320,
+  left: -320
+},
+".gameHeader":{
+	width: 320, 
+	height: 91, 
+	top: 0, 
+	left: -320,
+	backgroundColor: "#000"
+},
+".headerLabel":{
+	color: "#fff",
+	top: 20
+}
