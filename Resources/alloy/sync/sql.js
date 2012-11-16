@@ -57,7 +57,7 @@ function SQLiteMigrateDB() {
         Ti.API.info("create table migration called for " + config.adapter.collection_name);
         var self = this, columns = [];
         for (var k in config.columns) columns.push(k + " " + self.column(config.columns[k]));
-        var sql = "CREATE TABLE " + config.adapter.collection_name + " ( " + columns.join(",") + ",id" + " )";
+        var sql = "CREATE TABLE IF NOT EXISTS " + config.adapter.collection_name + " ( " + columns.join(",") + ",id" + " )";
         Ti.API.info(sql);
         db.execute(sql);
     };
@@ -68,7 +68,7 @@ function SQLiteMigrateDB() {
 }
 
 function Sync(model, method, opts) {
-    var table = model.config.adapter.collection_name, columns = model.config.columns;
+    var table = model.config.adapter.collection_name, columns = model.config.columns, resp = null;
     switch (method) {
       case "create":
         var names = [], values = [], q = [];
@@ -81,9 +81,10 @@ function Sync(model, method, opts) {
         values.push(id);
         db.execute(sql, values);
         model.id = id;
+        resp = model.toJSON();
         break;
       case "read":
-        var sql = "SELECT * FROM " + table, rs = db.execute(sql), len = 0;
+        var sql = "SELECT * FROM " + table, rs = db.execute(sql), len = 0, values = [];
         while (rs.isValidRow()) {
             var o = {}, fc = 0;
             fc = _.isFunction(rs.fieldCount) ? rs.fieldCount() : rs.fieldCount;
@@ -91,14 +92,13 @@ function Sync(model, method, opts) {
                 var fn = rs.fieldName(c);
                 o[fn] = rs.fieldByName(fn);
             });
-            var m = new model.config.Model(o);
-            model.models.push(m);
+            values.push(o);
             len++;
             rs.next();
         }
         rs.close();
         model.length = len;
-        model.trigger("fetch");
+        len === 1 ? resp = values[0] : resp = values;
         break;
       case "update":
         var names = [], values = [], q = [];
@@ -110,12 +110,18 @@ function Sync(model, method, opts) {
         var sql = "UPDATE " + table + " SET " + names.join(",") + " WHERE id=?", e = sql + "," + values.join(",") + "," + model.id;
         values.push(model.id);
         db.execute(sql, values);
+        resp = model.toJSON();
         break;
       case "delete":
         var sql = "DELETE FROM " + table + " WHERE id=?";
         db.execute(sql, model.id);
         model.id = null;
+        resp = model.toJSON();
     }
+    if (resp) {
+        opts.success(resp);
+        method === "read" && model.trigger("fetch");
+    } else opts.error("Record not found");
 }
 
 function GetMigrationForCached(t, m) {
@@ -125,31 +131,33 @@ function GetMigrationForCached(t, m) {
     return v;
 }
 
-function Migrate(migrations) {
+function Migrate(migrations, config) {
     var prev, sqlMigration = new SQLiteMigrateDB, migrationIds = {};
     db.execute("BEGIN;");
-    _.each(migrations, function(migration) {
-        var mctx = {};
-        migration(mctx);
-        var mid = GetMigrationForCached(mctx.name, migrationIds);
-        Ti.API.info("mid = " + mid + ", name = " + mctx.name);
-        if (!mid || mctx.id > mid) {
-            Ti.API.info("Migration starting to " + mctx.id + " for " + mctx.name);
-            prev && _.isFunction(prev.down) && prev.down(sqlMigration);
-            if (_.isFunction(mctx.up)) {
-                mctx.down(sqlMigration);
-                mctx.up(sqlMigration);
+    if (migrations.length) {
+        _.each(migrations, function(migration) {
+            var mctx = {};
+            migration(mctx);
+            var mid = GetMigrationForCached(mctx.name, migrationIds);
+            Ti.API.info("mid = " + mid + ", name = " + mctx.name);
+            if (!mid || mctx.id > mid) {
+                Ti.API.info("Migration starting to " + mctx.id + " for " + mctx.name);
+                prev && _.isFunction(prev.down) && prev.down(sqlMigration);
+                if (_.isFunction(mctx.up)) {
+                    mctx.down(sqlMigration);
+                    mctx.up(sqlMigration);
+                }
+                prev = mctx;
+            } else {
+                Ti.API.info("skipping migration " + mctx.id + ", already performed");
+                prev = null;
             }
-            prev = mctx;
-        } else {
-            Ti.API.info("skipping migration " + mctx.id + ", already performed");
-            prev = null;
+        });
+        if (prev && prev.id) {
+            db.execute("DELETE FROM migrations where model = ?", prev.name);
+            db.execute("INSERT INTO migrations VALUES (?,?)", prev.id, prev.name);
         }
-    });
-    if (prev && prev.id) {
-        db.execute("DELETE FROM migrations where model = ?", prev.name);
-        db.execute("INSERT INTO migrations VALUES (?,?)", prev.id, prev.name);
-    }
+    } else sqlMigration.createTable(config);
     db.execute("COMMIT;");
 }
 
@@ -166,6 +174,6 @@ module.exports.beforeModelCreate = function(config) {
 module.exports.afterModelCreate = function(Model) {
     Model = Model || {};
     Model.prototype.config.Model = Model;
-    Migrate(Model.migrations);
+    Migrate(Model.migrations, Model.prototype.config);
     return Model;
 };

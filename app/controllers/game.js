@@ -5,7 +5,10 @@ var year = 1910,
 	wrong = "#FF0000",
 	timer = 10,
 	intervalId = 0,
-	curQuestion = 1;
+	curQuestion = 0,
+	correctAnswers = 0,
+	quizList = require("data").list,
+	numberQuestions = quizList.length;
 	
 showNextQuestion("start");
 
@@ -27,9 +30,7 @@ function registerFrontEvents(start){
 	intervalId = setInterval(function(evt){
 		timer--;
 		if(timer === 0){
-			$.labelAnswered.text = 1 + " of "+curQuestion+ " correct";
-			curQuestion++;
-			showNextQuestion();
+			handleAnswer();
 		}
 		$.timer.text = timer + " out of 10 seconds remain";
 	}, 1000);
@@ -51,9 +52,7 @@ function registerBackEvents(){
 	intervalId = setInterval(function(evt){
 		timer--;
 		if(timer === 0){
-			$.labelAnswered.text = 1 + " of "+curQuestion+ " correct";
-			curQuestion++;
-			showNextQuestion();
+			handleAnswer();
 		}
 		$.timerBack.text = timer + " out of 10 seconds remain";
 	}, 1000);
@@ -61,41 +60,54 @@ function registerBackEvents(){
 
 function showNextQuestionFront(){
 	timer = 10;
-	$.questionLabel.text = "Who won the world cup in " + year + "?";
-	$.answer1.title = "Greece";
-	$.answer2.title = "Italy";
-	$.answer3.title = "Moroco";
+	$.questionLabel.text = quizList[curQuestion].question;
+	$.answer1.title = quizList[curQuestion].answers[0];
+	$.answer2.title = quizList[curQuestion].answers[1];
+	$.answer3.title = quizList[curQuestion].answers[2];
 }
 
 function showNextQuestionBack(){
 	timer = 10;
-	$.questionLabelBack.text = "Who won the world cup in " + year + "?";
-	$.answer1Back.title = "Russia";
-	$.answer2Back.title = "Mexico";
-	$.answer3Back.title = "Spain";
+	$.questionLabelBack.text = quizList[curQuestion].question;
+	$.answer1Back.title = quizList[curQuestion].answers[0];
+	$.answer2Back.title = quizList[curQuestion].answers[1];
+	$.answer3Back.title = quizList[curQuestion].answers[2];
 }
 
 function answer1Handler(){
-	$.labelAnswered.text = 1 + " of "+curQuestion+ " correct";
-	curQuestion++;
-	showNextQuestion();
+	if(quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0]){
+		correctAnswers++;
+	}
+	handleAnswer();
 }
 function answer2Handler(){
-	$.labelAnswered.text = 1 + " of "+curQuestion+ " correct";
-	curQuestion++;
-	showNextQuestion();
+	if(quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1]){
+		correctAnswers++;
+	}
+	handleAnswer();
 }
 function answer3Handler(){
-	$.labelAnswered.text = 1 + " of "+curQuestion+ " correct";
+	if(quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[2]){
+		correctAnswers++;
+	}
+	handleAnswer();
+}
+
+function handleAnswer(){
 	curQuestion++;
-	showNextQuestion();
+	$.labelAnswered.text = correctAnswers + " of "+curQuestion+ " correct";
+	if(curQuestion < numberQuestions){
+		showNextQuestion();
+	}
+	else{
+		goBack();
+	}
 }
 function goBack(){
 	Alloy.createController('index');
 }
 
 function showNextQuestion(start){
-	year += 4;
 	if(start === "start"){
 		showNextQuestionFront();
 		registerFrontEvents("start");

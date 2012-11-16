@@ -1,8 +1,12 @@
+function ucfirst(text) {
+    return text ? text[0].toUpperCase() + text.substr(1) : text;
+}
+
 function isTabletFallback() {
     return !(Math.min(Ti.Platform.displayCaps.platformHeight, Ti.Platform.displayCaps.platformWidth) < 700);
 }
 
-var _ = require("alloy/underscore")._, Backbone = require("alloy/backbone"), STR = require("alloy/string");
+var _ = require("alloy/underscore")._, Backbone = require("alloy/backbone");
 
 exports._ = _;
 
@@ -10,12 +14,12 @@ exports.Backbone = Backbone;
 
 exports.M = function(name, modelDesc, migrations) {
     var config = modelDesc.config, type = (config.adapter ? config.adapter.type : null) || "localDefault";
-    Ti.Platform.osname === "mobileweb" && type === "localDefault" ? type = "localStorage" : type === "localDefault" && (type = "sql");
+    type === "localDefault" && (type = "sql");
     var adapter = require("alloy/sync/" + type), extendObj = {
         defaults: config.defaults,
         sync: function(method, model, opts) {
-            var config = model.config || {}, type = (config.adapter ? config.adapter.type : null) || "localDefault";
-            Ti.Platform.osname === "mobileweb" && type === "localDefault" ? type = "localStorage" : type === "localDefault" && (type = "sql");
+            var config = model.config || {}, adapterObj = config.adapter || {}, type = (config.adapter ? config.adapter.type : null) || "localDefault";
+            type === "localDefault" && (type = "sql");
             require("alloy/sync/" + type).sync(model, method, opts);
         }
     }, extendClass = {};
@@ -33,7 +37,7 @@ exports.C = function(name, modelDesc, model) {
         model: model,
         sync: function(method, model, opts) {
             var config = model.config || {}, type = (config.adapter ? config.adapter.type : null) || "localDefault";
-            Ti.Platform.osname === "mobileweb" && type === "localDefault" ? type = "localStorage" : type === "localDefault" && (type = "sql");
+            type === "localDefault" && (type = "sql");
             require("alloy/sync/" + type).sync(model, method, opts);
         }
     }, Collection = Backbone.Collection.extend(extendObj), config = Collection.prototype.config = model.prototype.config, type = (config.adapter ? config.adapter.type : null) || "localDefault", adapter = require("alloy/sync/" + type);
@@ -45,8 +49,11 @@ exports.C = function(name, modelDesc, model) {
 exports.A = function(t, type, parent) {
     _.extend(t, Backbone.Events);
     (function() {
-        var al = t.addEventListener, rl = t.removeEventListener, oo = t.on, of = t.off, tg = t.trigger, cbs = [], ctx = {};
+        var al = t.addEventListener, rl = t.removeEventListener, oo = t.on, of = t.off, tg = t.trigger, cbs = {}, ctx = _.extend({}, Backbone.Events);
         if (!al || !rl) return;
+        t.trigger = function() {
+            ctx.trigger.apply(ctx, Array.prototype.slice.apply(arguments));
+        };
         t.on = function(e, cb, context) {
             var wcb = function(evt) {
                 try {
@@ -55,16 +62,22 @@ exports.A = function(t, type, parent) {
                     Ti.API.error("Error triggering '" + e + "' event: " + E);
                 }
             };
-            cbs[cb] = wcb;
-            al(e, wcb);
+            if (!cbs[e]) {
+                cbs[e] = {};
+                al(e, wcb);
+            }
+            cbs[e][cb] = wcb;
             _.bind(oo, ctx, e, cb, context)();
         };
         t.off = function(e, cb, context) {
-            var f = cbs[cb];
+            var f = cbs[e] ? cbs[e][cb] : null;
             if (f) {
                 _.bind(of, ctx, e, cb, context)();
-                rl(e, f);
-                delete cbs[cb];
+                delete cbs[e][cb];
+                if (cbs[e].length === 0) {
+                    delete cbs[e];
+                    rl(e, f);
+                }
                 f = null;
             }
         };
@@ -96,7 +109,7 @@ exports.getModel = function(name, args) {
 };
 
 exports.createModel = function(name, args) {
-    return new (require("alloy/models/" + STR.ucfirst(name)).Model)(args);
+    return new (require("alloy/models/" + ucfirst(name)).Model)(args);
 };
 
 exports.getCollection = function(name, args) {
@@ -105,7 +118,7 @@ exports.getCollection = function(name, args) {
 };
 
 exports.createCollection = function(name, args) {
-    return new (require("alloy/models/" + STR.ucfirst(name)).Collection)(args);
+    return new (require("alloy/models/" + ucfirst(name)).Collection)(args);
 };
 
 exports.isTablet = function() {
@@ -114,4 +127,4 @@ exports.isTablet = function() {
 
 exports.isHandheld = !exports.isTablet;
 
-exports.version = "0.3.1";
+exports.version = "0.3.2";
