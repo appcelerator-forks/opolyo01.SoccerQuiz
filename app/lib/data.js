@@ -17,12 +17,12 @@ quiz.list = [{
 	"answers":["Bolgaria", "Sweeden", "USA"]
 },{
 	"question": "Who won the world cup 1926?",
-	"correctAnswer": "Germany",
+	"correctAnswer": "Moldova",
 	"answers":["Moldova", "Litva", "Costa Rica"]
 },{
 	"question": "Goals scored in 2008 world cup?",
 	"correctAnswer": "40",
-	"answers":["34", "56", "89"]
+	"answers":["34", "40", "89"]
 },{
 	"question": "Most goals in world cups?",
 	"correctAnswer": "Oleg Polyakov",

@@ -62,22 +62,34 @@ function Controller() {
         if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0]) {
             correctAnswers++;
             this.backgroundColor = good;
-        } else this.backgroundColor = wrong;
+        } else {
+            selectCorrect();
+            this.backgroundColor = wrong;
+        }
         handleAnswer();
     }
     function answer2Handler(e) {
         if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1]) {
             correctAnswers++;
             this.backgroundColor = good;
-        } else this.backgroundColor = wrong;
+        } else {
+            selectCorrect();
+            this.backgroundColor = wrong;
+        }
         handleAnswer();
     }
     function answer3Handler(e) {
         if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[2]) {
             correctAnswers++;
             this.backgroundColor = good;
-        } else this.backgroundColor = wrong;
+        } else {
+            selectCorrect();
+            this.backgroundColor = wrong;
+        }
         handleAnswer();
+    }
+    function selectCorrect() {
+        quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0] ? front ? $.answer1.backgroundColor = good : $.answer1Back.backgroundColor = good : quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1] ? front ? $.answer2.backgroundColor = good : $.answer2Back.backgroundColor = good : front ? $.answer3.backgroundColor = good : $.answer3Back.backgroundColor = good;
     }
     function handleAnswer() {
         curQuestion++;
@@ -346,7 +358,7 @@ function Controller() {
     }), "Label", $.__views.gameViewBack);
     $.__views.gameViewBack.add($.__views.timerBack);
     _.extend($, $.__views);
-    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, quizList = require("data").list, numberQuestions = quizList.length;
+    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, idx, quizList = require("data").list, numberQuestions = quizList.length;
     showNextQuestion("start");
     _.extend($, exports);
 }

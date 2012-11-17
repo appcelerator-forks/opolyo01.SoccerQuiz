@@ -7,6 +7,8 @@
 		<Label id="line3" class="resultLabel">What do you want to do next?</Label>
 	    <Button id="play" class="homeButton">Take Quiz</Button>
 	    <Button id="leaderboards" class="homeButton">Standings</Button>
+	    <View id="facebook"/>
+	    <View id="twitter"/>
 	</View>
   </Window>
 </Alloy>

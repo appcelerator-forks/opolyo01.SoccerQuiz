@@ -30,6 +30,19 @@
 ".resultLabel":{
 	color: "#fff",
 	height: 0
+},
+'#facebook': {
+	top: 30,
+	backgroundImage:'/images/post/btn-facebook-off.png',
+	height:'30dp',
+	width:'30dp'
+},
+'#twitter': {
+	top: -30,
+	left: 100,
+	backgroundImage:'/images/post/btn-twitter-off.png',
+	height:'30dp',
+	width:'30dp'
 }
 
 	

@@ -111,6 +111,23 @@ function Controller() {
         id: "leaderboards"
     }), "Button", $.__views.homeView);
     $.__views.homeView.add($.__views.leaderboards);
+    $.__views.facebook = A$(Ti.UI.createView({
+        top: 30,
+        backgroundImage: "/images/post/btn-facebook-off.png",
+        height: "30dp",
+        width: "30dp",
+        id: "facebook"
+    }), "View", $.__views.homeView);
+    $.__views.homeView.add($.__views.facebook);
+    $.__views.twitter = A$(Ti.UI.createView({
+        top: -30,
+        left: 100,
+        backgroundImage: "/images/post/btn-twitter-off.png",
+        height: "30dp",
+        width: "30dp",
+        id: "twitter"
+    }), "View", $.__views.homeView);
+    $.__views.homeView.add($.__views.twitter);
     _.extend($, $.__views);
     $.play.addEventListener("click", playHandler);
     $.leaderboards.addEventListener("click", leadersHandler);

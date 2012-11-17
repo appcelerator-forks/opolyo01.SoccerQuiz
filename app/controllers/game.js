@@ -6,6 +6,7 @@ var	front = false,
 	intervalId = 0,
 	curQuestion = 0,
 	correctAnswers = 0,
+	idx,
 	quizList = require("data").list,
 	numberQuestions = quizList.length;
 	
@@ -90,6 +91,7 @@ function answer1Handler(e){
 		this.backgroundColor=good;
 	}
 	else{
+		selectCorrect();
 		this.backgroundColor=wrong;
 	}
 	handleAnswer();
@@ -100,6 +102,7 @@ function answer2Handler(e){
 		this.backgroundColor=good;
 	}
 	else{
+		selectCorrect();
 		this.backgroundColor=wrong;
 	}
 	handleAnswer();
@@ -110,11 +113,39 @@ function answer3Handler(e){
 		this.backgroundColor=good;
 	}
 	else{
+		selectCorrect();
 		this.backgroundColor=wrong;
 	}
 	handleAnswer();
 }
 
+function selectCorrect(){
+	if(quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0]){
+		if(!front){
+			$.answer1Back.backgroundColor=good;
+		}
+		else{
+			$.answer1.backgroundColor=good;
+		}
+		
+	}
+	else if(quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1]){
+		if(!front){
+			$.answer2Back.backgroundColor=good;
+		}
+		else{
+			$.answer2.backgroundColor=good;
+		}
+	}
+	else{
+		if(!front){
+			$.answer3Back.backgroundColor=good;
+		}
+		else{
+			$.answer3.backgroundColor=good;
+		}
+	}
+}
 function handleAnswer(){
 	curQuestion++;
 	$.labelAnswered.text = correctAnswers + " of "+curQuestion+ " correct";
