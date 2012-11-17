@@ -11,6 +11,10 @@ var	front = false,
 	
 showNextQuestion("start");
 
+function registerResultsEvents(){
+	$.startOver.addEventListener("click", goBack);
+}
+
 function registerFrontEvents(start){
 	$.answer1Back.backgroundColor=neutral;
 	$.answer2Back.backgroundColor=neutral;
@@ -119,11 +123,26 @@ function handleAnswer(){
 	}
 	else{
 		clearInterval(intervalId);
-		goBack();
+		showAnswerPage();
 	}
 }
+
+function showAnswerPage(){
+	var percentCorrect = parseInt((correctAnswers/numberQuestions)*100, 10);
+	var line1Text = percentCorrect > 60 ? "Congrats, well done!" : "Can do better next time",
+		line2Text = "you answered " +correctAnswers +" out "+numberQuestions +" questions";
+	var index = Alloy.createController('index');
+	index.headingLabel.height = 0;
+    index.line1.height = 30;
+    index.line1.text = line1Text;
+    index.line2.height = 30;
+    index.line2.text = line2Text;
+    index.line3.height = 30;
+}
+
 function goBack(){
-	Alloy.createController('index');
+	clearInterval(intervalId);
+	var index = Alloy.createController('index');
 }
 
 function showNextQuestion(start){

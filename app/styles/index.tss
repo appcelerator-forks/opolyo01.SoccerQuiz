@@ -4,6 +4,7 @@
 	left: 10,
 	right:10,
 	style:0,
+	textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 	font:{fontWeight:"bold", fontSize:24}
 },
 "#homeView": {
@@ -25,5 +26,10 @@
 	backgroundColor: "#B20838",
 	height: 43,
 	font:{fontWeight:"bold", fontSize:24}
+},
+".resultLabel":{
+	color: "#fff",
+	height: 0
 }
+
 	

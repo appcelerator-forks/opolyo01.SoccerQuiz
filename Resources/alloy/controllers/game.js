@@ -1,4 +1,7 @@
 function Controller() {
+    function registerResultsEvents() {
+        $.startOver.addEventListener("click", goBack);
+    }
     function registerFrontEvents(start) {
         $.answer1Back.backgroundColor = neutral;
         $.answer2Back.backgroundColor = neutral;
@@ -81,11 +84,21 @@ function Controller() {
         $.labelAnswered.text = correctAnswers + " of " + curQuestion + " correct";
         if (curQuestion < numberQuestions) showNextQuestion(); else {
             clearInterval(intervalId);
-            goBack();
+            showAnswerPage();
         }
     }
+    function showAnswerPage() {
+        var percentCorrect = parseInt(correctAnswers / numberQuestions * 100, 10), line1Text = percentCorrect > 60 ? "Congrats, well done!" : "Can do better next time", line2Text = "you answered " + correctAnswers + " out " + numberQuestions + " questions", index = Alloy.createController("index");
+        index.headingLabel.height = 0;
+        index.line1.height = 30;
+        index.line1.text = line1Text;
+        index.line2.height = 30;
+        index.line2.text = line2Text;
+        index.line3.height = 30;
+    }
     function goBack() {
-        Alloy.createController("index");
+        clearInterval(intervalId);
+        var index = Alloy.createController("index");
     }
     function showNextQuestion(start) {
         if (start === "start") {
@@ -124,15 +137,23 @@ function Controller() {
     }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
+    $.__views.container = A$(Ti.UI.createView({
+        top: 0,
+        backgroundColor: "#000",
+        height: 480,
+        width: 320,
+        id: "container"
+    }), "View", null);
+    $.addTopLevelView($.__views.container);
     $.__views.gameHeader = A$(Ti.UI.createView({
         width: 320,
         height: 91,
         top: 0,
-        left: -320,
+        left: 0,
         backgroundColor: "#000",
         id: "gameHeader"
-    }), "View", null);
-    $.addTopLevelView($.__views.gameHeader);
+    }), "View", $.__views.container);
+    $.__views.container.add($.__views.gameHeader);
     $.__views.backButton = A$(Ti.UI.createButton({
         height: 40,
         width: 40,
@@ -179,10 +200,10 @@ function Controller() {
         title: "Game",
         height: 389,
         width: 320,
-        left: -320,
+        left: 0,
         id: "gameView"
-    }), "View", null);
-    $.addTopLevelView($.__views.gameView);
+    }), "View", $.__views.container);
+    $.__views.container.add($.__views.gameView);
     $.__views.questionLabel = A$(Ti.UI.createLabel({
         top: 20,
         color: "#FFF",
@@ -257,8 +278,8 @@ function Controller() {
         width: 320,
         left: -320,
         id: "gameViewBack"
-    }), "View", null);
-    $.addTopLevelView($.__views.gameViewBack);
+    }), "View", $.__views.container);
+    $.__views.container.add($.__views.gameViewBack);
     $.__views.questionLabelBack = A$(Ti.UI.createLabel({
         top: 20,
         color: "#FFF",

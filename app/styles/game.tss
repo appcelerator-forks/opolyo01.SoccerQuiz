@@ -1,9 +1,9 @@
 ".homeButton" : {
-    top:40,
+    top:10,
 	left: 10,
 	right:10,
 	style:0,
-	backgroundColor: "#484848",
+	backgroundColor: "#B20838",
 	height: 43,
 	font:{fontWeight:"bold", fontSize:24}
 },
@@ -56,6 +56,12 @@
 	height: 43,
 	font:{fontWeight:"bold", fontSize:24},
 },
+"#container":{
+	top: 0,
+  	backgroundColor: "#000",
+  	height: 480,
+  	width: 320
+},
 ".gameView": {
   top: 91,
   backgroundColor: "#000",
@@ -63,16 +69,22 @@
   title: "Game",
   height: 389,
   width: 320,
-  left: -320
+  left: 0
 },
 ".gameHeader":{
 	width: 320, 
 	height: 91, 
 	top: 0, 
-	left: -320,
+	left: 0,
 	backgroundColor: "#000"
 },
 ".headerLabel":{
 	color: "#fff",
 	top: 20
+},
+"#gameView":{
+	left: 0
+},
+"#gameViewBack":{
+	left: -320
 }

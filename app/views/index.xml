@@ -1,9 +1,12 @@
 <Alloy>
   <Window id="homeWindow" exitOnClose="true">
   	<View id="homeView">
-	  	<Label id="headingLabel">Test your knowledge of soccer with this quiz.</Label>
-	    <Button id="play" class="homeButton">Play</Button>
-	    <Button id="leaderboards" class="homeButton">Leaders</Button>
+	  	<Label id="headingLabel">Check your soccer knowledge</Label>
+		<Label id="line1" class="resultLabel">Congrats, well done!</Label>
+		<Label id="line2" class="resultLabel">you answered 5 out 8 questions</Label>
+		<Label id="line3" class="resultLabel">What do you want to do next?</Label>
+	    <Button id="play" class="homeButton">Take Quiz</Button>
+	    <Button id="leaderboards" class="homeButton">Standings</Button>
 	</View>
   </Window>
 </Alloy>
