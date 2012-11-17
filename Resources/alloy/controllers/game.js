@@ -1,5 +1,8 @@
 function Controller() {
     function registerFrontEvents(start) {
+        $.answer1Back.backgroundColor = neutral;
+        $.answer2Back.backgroundColor = neutral;
+        $.answer3Back.backgroundColor = neutral;
         if (start !== "start") {
             $.answer1Back.removeEventListener("click", answer1Handler);
             $.answer2Back.removeEventListener("click", answer2Handler);
@@ -19,6 +22,9 @@ function Controller() {
         }, 1000);
     }
     function registerBackEvents() {
+        $.answer1.backgroundColor = neutral;
+        $.answer2.backgroundColor = neutral;
+        $.answer3.backgroundColor = neutral;
         $.answer1.removeEventListener("click", answer1Handler);
         $.answer2.removeEventListener("click", answer2Handler);
         $.answer3.removeEventListener("click", answer3Handler);
@@ -49,22 +55,34 @@ function Controller() {
         $.answer2Back.title = quizList[curQuestion].answers[1];
         $.answer3Back.title = quizList[curQuestion].answers[2];
     }
-    function answer1Handler() {
-        quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0] && correctAnswers++;
+    function answer1Handler(e) {
+        if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[0]) {
+            correctAnswers++;
+            this.backgroundColor = good;
+        } else this.backgroundColor = wrong;
         handleAnswer();
     }
-    function answer2Handler() {
-        quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1] && correctAnswers++;
+    function answer2Handler(e) {
+        if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[1]) {
+            correctAnswers++;
+            this.backgroundColor = good;
+        } else this.backgroundColor = wrong;
         handleAnswer();
     }
-    function answer3Handler() {
-        quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[2] && correctAnswers++;
+    function answer3Handler(e) {
+        if (quizList[curQuestion].correctAnswer === quizList[curQuestion].answers[2]) {
+            correctAnswers++;
+            this.backgroundColor = good;
+        } else this.backgroundColor = wrong;
         handleAnswer();
     }
     function handleAnswer() {
         curQuestion++;
         $.labelAnswered.text = correctAnswers + " of " + curQuestion + " correct";
-        curQuestion < numberQuestions ? showNextQuestion() : goBack();
+        if (curQuestion < numberQuestions) showNextQuestion(); else {
+            clearInterval(intervalId);
+            goBack();
+        }
     }
     function goBack() {
         Alloy.createController("index");
@@ -307,7 +325,7 @@ function Controller() {
     }), "Label", $.__views.gameViewBack);
     $.__views.gameViewBack.add($.__views.timerBack);
     _.extend($, $.__views);
-    var year = 1910, front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, quizList = require("data").list, numberQuestions = quizList.length;
+    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, quizList = require("data").list, numberQuestions = quizList.length;
     showNextQuestion("start");
     _.extend($, exports);
 }

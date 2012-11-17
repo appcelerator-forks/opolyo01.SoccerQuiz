@@ -25,8 +25,8 @@ quiz.list = [ {
     correctAnswer: "40",
     answers: [ "34", "56", "89" ]
 }, {
-    question: "Who scored most goals on world cups?",
-    correctAnswer: "Germany",
+    question: "Most goals in world cups?",
+    correctAnswer: "Oleg Polyakov",
     answers: [ "Ronaldo", "Oleg Polyakov", "Sergei" ]
 }, {
     question: "Who won the world cup 1938?",
