@@ -6,6 +6,7 @@
     <property name="acs-oauth-secret-development" type="string">N61FeFppMqfkZqlFQbqFgnSiwBZdTFEX</property>
     <property name="acs-oauth-key-development" type="string">BU4VyIWx6Hr7FypjxnVohMSCdMB49fII</property>
     <property name="acs-api-key-development" type="string">9CzUGoVmT13XRcAeEU84NaEVpQw3rhD9</property>
+    <property name="ti.facebook.appid">112860402210296</property>
     <id>com.opolyakov</id>
     <name>SoccerQuiz</name>
     <version>1.0</version>

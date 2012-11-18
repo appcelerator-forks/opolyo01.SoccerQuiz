@@ -111,6 +111,21 @@ function Controller() {
         id: "leaderboards"
     }), "Button", $.__views.homeView);
     $.__views.homeView.add($.__views.leaderboards);
+    $.__views.post = A$(Ti.UI.createTextArea({
+        top: 20,
+        left: "5dp",
+        right: "5dp",
+        height: 80,
+        editable: !1,
+        value: "I just scored 8 out of 10 on SoccerQuiz. I am number 40 with total score of 300 points",
+        font: {
+            fontSize: "14dp"
+        },
+        autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
+        autocorrect: !0,
+        id: "post"
+    }), "TextArea", $.__views.homeView);
+    $.__views.homeView.add($.__views.post);
     $.__views.facebook = A$(Ti.UI.createView({
         top: 30,
         backgroundImage: "/images/post/btn-facebook-off.png",
@@ -128,9 +143,68 @@ function Controller() {
         id: "twitter"
     }), "View", $.__views.homeView);
     $.__views.homeView.add($.__views.twitter);
+    $.__views.submit = A$(Ti.UI.createButton({
+        top: -30,
+        right: 50,
+        width: "65dp",
+        height: "30dp",
+        backgroundImage: "/images/post/btn-post-default.png",
+        backgroundSelectedImage: "/images/post/btn-post-pressed.png",
+        id: "submit"
+    }), "Button", $.__views.homeView);
+    $.__views.homeView.add($.__views.submit);
     _.extend($, $.__views);
+    var Status = require("Status"), User = require("User"), Cloud = require("ti.cloud"), config = require("config");
+    config.setup();
+    Ti.API.info(Ti.App.Properties.getString("twitter.consumerSecret"));
+    Ti.API.info(Ti.App.Properties.getString("twitter.consumerKey"));
+    Ti.Facebook.permissions = [ "publish_stream" ];
     $.play.addEventListener("click", playHandler);
     $.leaderboards.addEventListener("click", leadersHandler);
+    var fbOn = !1;
+    $.facebook.on("click", function() {
+        if (!fbOn) {
+            function setOn() {
+                fbOn = !0;
+                $.facebook.backgroundImage = "/images/post/btn-facebook-on.png";
+            }
+            User.confirmLogin.toFacebook() ? setOn() : User.linkToFacebook(function(e) {
+                setOn();
+            });
+        } else {
+            fbOn = !1;
+            $.facebook.backgroundImage = "/images/post/btn-facebook-off.png";
+        }
+    });
+    var twitterOn = !1;
+    $.twitter.on("click", function() {
+        if (!twitterOn) {
+            function setOn() {
+                twitterOn = !0;
+                $.twitter.backgroundImage = "/images/post/btn-twitter-on.png";
+            }
+            User.confirmLogin.toTwitter() ? setOn() : User.linkToTwitter(function(e) {
+                setOn();
+            });
+        } else {
+            twitterOn = !1;
+            $.twitter.backgroundImage = "/images/post/btn-twitter-off.png";
+        }
+    });
+    $.submit.on("click", function() {
+        var currentPost = $.post.value, args = {
+            success: function(ev) {
+                alert("success posting");
+            },
+            error: function(ev) {
+                alert(ev);
+            }
+        };
+        args.message = currentPost;
+        Ti.API.info(currentPost);
+        twitterOn && User.tweet(args);
+        fbOn && User.facebookPost(args);
+    });
     $.homeWindow.open();
     _.extend($, exports);
 }

@@ -31,6 +31,44 @@
 	color: "#fff",
 	height: 0
 },
+'#divider': {
+	bottom:'50dp',
+	height:'1dp',
+	backgroundColor:'#cdcdcd',
+	left:'5dp',
+	right:'5dp'
+},
+'#characters': {
+	top: 10,
+	height:Ti.UI.SIZE,
+	width:Ti.UI.SIZE,
+	color:'#cdcdcd',
+	font:{
+		fontSize:'10dp'
+	},
+	visible:false
+},
+'#submit': {
+	top: -30,
+	right: 50,
+	width:'65dp',
+	height:'30dp',
+	backgroundImage:'/images/post/btn-post-default.png',
+	backgroundSelectedImage:'/images/post/btn-post-pressed.png'
+},
+'#post': {
+	top: 20,
+	left:'5dp',
+	right:'5dp',
+	height: 80,
+	editable: false,
+	value: "I just scored 8 out of 10 on SoccerQuiz. I am number 40 with total score of 300 points",
+	font: {
+		fontSize:'14dp'
+	},
+	autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
+    autocorrect: true
+},
 '#facebook': {
 	top: 30,
 	backgroundImage:'/images/post/btn-facebook-off.png',
