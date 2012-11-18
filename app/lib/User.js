@@ -29,6 +29,7 @@ User.confirmLogin = function() {
 
 //Check social login
 User.confirmLogin.toFacebook = function() {
+	alert("you are "+Ti.Facebook.loggedIn);
 	return Ti.Facebook.loggedIn;
 };
 
@@ -39,6 +40,7 @@ User.confirmLogin.toTwitter = function() {
 //Link to Facebook
 User.linkToFacebook = function(cb) {
 	Ti.Facebook.addEventListener('login', function(e) {
+		alert(e);
 		cb && cb(e);
 	});
 	Ti.Facebook.authorize();
