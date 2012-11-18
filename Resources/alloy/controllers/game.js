@@ -96,7 +96,7 @@ function Controller() {
         $.labelAnswered.text = correctAnswers + " of " + curQuestion + " correct";
         if (curQuestion < numberQuestions) showNextQuestion(); else {
             clearInterval(intervalId);
-            showAnswerPage();
+            updateTotal();
         }
     }
     function showAnswerPage() {
@@ -107,6 +107,58 @@ function Controller() {
         index.line2.height = 30;
         index.line2.text = line2Text;
         index.line3.height = 30;
+        index.post.value = "I just scored " + correctAnswers + " out of " + numberQuestions + " on SoccerQuiz. I have " + totalPoints + " total points";
+        index.post.visible = !0;
+        index.facebook.visible = !0;
+        index.twitter.visible = !0;
+        index.submit.visible = !0;
+    }
+    function getUser(cb) {
+        var json;
+        Cloud.Objects.query({
+            classname: "users",
+            page: 1,
+            per_page: 10,
+            where: {
+                username: Ti.App.Properties.getString("username")
+            }
+        }, function(e) {
+            if (e.success) {
+                e.users.length > 0 && (json = e.users);
+                Ti.API.info("Success:\\nCount: " + e.users.length);
+                cb.call(this, json);
+            } else {
+                Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+                cb.call(this, json);
+            }
+        });
+    }
+    function updateTotal() {
+        getUser(function(json) {
+            if (!json) return;
+            var obj = json[0], quizResults = obj.quizResults ? obj.quizResults : [], total = 0;
+            quizResults.push(correctAnswers);
+            quizResults.forEach(function(el) {
+                total += el;
+            });
+            totalPoints = total;
+            Ti.API.info(totalPoints);
+            showAnswerPage();
+            if (obj) {
+                Ti.API.info(obj);
+                Ti.API.info(obj.id);
+                Cloud.Objects.update({
+                    classname: "users",
+                    id: obj.id,
+                    fields: {
+                        totalPoints: total,
+                        quizResults: quizResults
+                    }
+                }, function(e) {
+                    e.success ? Ti.API.info("added quiz results") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+                });
+            }
+        });
     }
     function goBack() {
         clearInterval(intervalId);
@@ -358,7 +410,7 @@ function Controller() {
     }), "Label", $.__views.gameViewBack);
     $.__views.gameViewBack.add($.__views.timerBack);
     _.extend($, $.__views);
-    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, idx, quizList = require("data").list, numberQuestions = quizList.length;
+    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, idx, totalPoints = 0, Cloud = require("ti.cloud"), quizList = require("data").list, numberQuestions = quizList.length;
     showNextQuestion("start");
     _.extend($, exports);
 }

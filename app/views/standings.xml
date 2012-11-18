@@ -1,0 +1,13 @@
+<Alloy>
+	<View id="container">
+		<Button id="backButton">Back</Button>
+		<TableView id="table">
+            <TableViewSection id="sectionFruit" headerTitle="Top Performers">
+                <TableViewRow title="Oleg"/>
+                <TableViewRow title="Mike"/>
+                <TableViewRow title="Sam"/>
+                <TableViewRow title="Andrew"/>
+            </TableViewSection>
+        </TableView>
+	</View>
+</Alloy>

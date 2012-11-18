@@ -1,0 +1,11 @@
+"#container": {
+	backgroundColor: "#fff",
+	layout: "vetical"
+},
+"#backButton":{
+	top: 10,
+	left: 10
+},
+"#table":{
+	top:70
+}

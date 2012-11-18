@@ -7,6 +7,8 @@ var	front = false,
 	curQuestion = 0,
 	correctAnswers = 0,
 	idx,
+	totalPoints = 0,
+	Cloud = require('ti.cloud'),
 	quizList = require("data").list,
 	numberQuestions = quizList.length;
 	
@@ -154,7 +156,7 @@ function handleAnswer(){
 	}
 	else{
 		clearInterval(intervalId);
-		showAnswerPage();
+		updateTotal();
 	}
 }
 
@@ -163,12 +165,79 @@ function showAnswerPage(){
 	var line1Text = percentCorrect > 60 ? "Congrats, well done!" : "Can do better next time",
 		line2Text = "you answered " +correctAnswers +" out "+numberQuestions +" questions";
 	var index = Alloy.createController('index');
+	//Need to write to db
 	index.headingLabel.height = 0;
     index.line1.height = 30;
     index.line1.text = line1Text;
     index.line2.height = 30;
     index.line2.text = line2Text;
     index.line3.height = 30;
+    index.post.value = "I just scored " +correctAnswers +" out of "+numberQuestions +" on SoccerQuiz. I have "+totalPoints +" total points";
+    index.post.visible = true;
+    index.facebook.visible = true;
+    index.twitter.visible = true;
+    index.submit.visible = true;
+}
+
+
+function getUser(cb){
+	var json;
+	Cloud.Objects.query({
+		classname : 'users',
+		page: 1,
+	    per_page: 10,
+	    where: {
+	        "username": Ti.App.Properties.getString("username")
+	    }
+	}, function(e) {
+		if (e.success) {
+			if(e.users.length > 0){
+				json = e.users;
+			}
+			Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
+			cb.call(this, json);
+		} 
+		else {
+			Ti.API.info('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
+			cb.call(this, json);
+		}
+	}); 
+
+}
+function updateTotal(){
+	getUser(function(json){
+		if(!json){
+			return;
+		}
+		var obj = json[0];
+		var quizResults = obj.quizResults ? obj.quizResults:[];
+		var total = 0;
+		quizResults.push(correctAnswers);
+		quizResults.forEach(function(el){total+=el;});
+		totalPoints = total;
+		
+		Ti.API.info(totalPoints);
+		showAnswerPage();
+		if(obj){
+			//Ti.API.info(json);
+			Ti.API.info(obj);
+			Ti.API.info(obj.id);
+			Cloud.Objects.update({
+				classname : 'users',
+					id : obj.id,
+					fields : {
+						totalPoints :total,
+						quizResults : quizResults
+					}
+				}, function(e) {
+					if (e.success) {
+						Ti.API.info("added quiz results");
+					} else {
+						alert('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
+					}
+			}); 
+		}
+	});
 }
 
 function goBack(){
