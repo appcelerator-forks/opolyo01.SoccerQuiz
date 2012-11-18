@@ -124,30 +124,25 @@ function Controller() {
             }
         }, function(e) {
             if (e.success) {
-                e.users.length > 0 && (json = e.users);
-                Ti.API.info("Success:\\nCount: " + e.users.length);
-                cb.call(this, json);
-            } else {
-                Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-                cb.call(this, json);
-            }
+                if (e.users.length > 0) {
+                    json = e.users;
+                    Ti.API.info("Success:\\nCount: " + e.users.length);
+                }
+            } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+            cb.call(this, json);
         });
     }
     function updateTotal() {
         getUser(function(json) {
-            if (!json) return;
-            var obj = json[0], quizResults = obj.quizResults ? obj.quizResults : [], total = 0;
-            quizResults.push(correctAnswers);
-            quizResults.forEach(function(el) {
-                total += el;
-            });
-            totalPoints = total;
-            Ti.API.info(totalPoints);
-            showAnswerPage();
-            if (obj) {
-                Ti.API.info(obj);
-                Ti.API.info(obj.id);
-                Cloud.Objects.update({
+            if (!json) showAnswerPage(); else {
+                var obj = json[0], quizResults = obj.quizResults ? obj.quizResults : [], total = 0;
+                quizResults.push(correctAnswers);
+                quizResults.forEach(function(el) {
+                    total += el;
+                });
+                totalPoints = total;
+                showAnswerPage();
+                obj && Cloud.Objects.update({
                     classname: "users",
                     id: obj.id,
                     fields: {

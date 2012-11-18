@@ -6,7 +6,7 @@
 		<Label id="line2" class="resultLabel">you answered 5 out 8 questions</Label>
 		<Label id="line3" class="resultLabel">What do you want to do next?</Label>
 	    <Button id="play" class="homeButton">Take Quiz</Button>
-	    <Button id="standings" class="homeButton">Standings</Button>
+	    <!-- <Button id="standings" class="homeButton">Standings</Button> -->
 	    
 	    <TextArea id="post"/>
 	    <View id="facebook"/>

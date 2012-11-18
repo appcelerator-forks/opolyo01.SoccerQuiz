@@ -14,25 +14,10 @@ function Controller() {
             $.homeWindow.remove($.homeView);
         });
     }
-    function standingsHandler() {
-        if (!Ti.App.Properties.getString("username")) addFBLogin(); else {
-            $.standings = Alloy.createController("standings");
-            $.homeWindow.add($.standings.container);
-            $.standings.container.left = -320;
-            $.standings.container.animate({
-                left: 0,
-                duration: 1500
-            });
-            $.homeView.animate({
-                left: 320,
-                duration: 1000
-            }, function() {
-                $.homeWindow.remove($.homeView);
-            });
-        }
-    }
-    function isUserRegistered(username) {
-        var registered = !0;
+    function isUserRegistered(username, cb) {
+        var json = {
+            exist: !1
+        };
         Cloud.Objects.query({
             classname: "users",
             page: 1,
@@ -43,24 +28,25 @@ function Controller() {
         }, function(e) {
             if (e.success) {
                 Ti.API.info("Success:\\nCount: " + e.users.length);
-                e.users.length > 0 ? registered = !0 : registered = !1;
-            } else {
-                Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-                registered = !0;
+                e.users.length > 0 && (json = {
+                    exist: !0
+                });
             }
+            cb.call(this, json);
         });
-        return registered;
     }
     function insertUserACS(json) {
-        if (!isUserRegistered(json.username)) {
-            var acsJson = {
-                classname: "users",
-                fields: json
-            };
-            Cloud.Objects.create(acsJson, function(e) {
-                e.success ? Ti.API.info(e) : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-            });
-        }
+        isUserRegistered(json.username, function(resp) {
+            if (!resp.exist) {
+                var acsJson = {
+                    classname: "users",
+                    fields: json
+                };
+                Cloud.Objects.create(acsJson, function(e) {
+                    e.success ? Ti.API.info(e) : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+                });
+            } else alert("this username already exist pick another one");
+        });
     }
     function addFBLogin() {
         function getUserInfo() {
@@ -68,9 +54,6 @@ function Controller() {
                 if (e.success) {
                     var json = JSON.parse(e.result);
                     username.value = json.username;
-                    Ti.App.Properties.setString("username", username.value);
-                    insertUserACS(json);
-                    debug || wina.close();
                 } else e.error ? alert(e.error) : alert("Unknown response");
             });
         }
@@ -136,11 +119,29 @@ function Controller() {
         closeButton.addEventListener("click", function() {
             wina.close();
         });
+        username.addEventListener("focus", function() {
+            wina.top = -120;
+            wina.animate({
+                bottom: 166,
+                duration: 500
+            });
+        });
+        username.addEventListener("blur", function() {
+            wina.top = 0;
+            wina.animate({
+                bottom: 0,
+                duration: 500
+            });
+        });
+        wina.addEventListener("click", function() {
+            username.blur();
+        });
         registerButton.addEventListener("click", function() {
             Ti.App.Properties.setString("username", username.value);
             insertUserACS({
                 username: username.value
             });
+            Ti.App.Properties.setString("username", username.value);
             wina.close();
         });
         wina.setLeftNavButton(closeButton);
@@ -150,6 +151,25 @@ function Controller() {
         wina.add(username);
         wina.add(registerButton);
         wina.open();
+    }
+    function getUser(cb) {
+        var json;
+        Cloud.Objects.query({
+            classname: "users",
+            page: 1,
+            per_page: 10,
+            where: {
+                username: Ti.App.Properties.getString("username")
+            }
+        }, function(e) {
+            if (e.success) {
+                if (e.users.length > 0) {
+                    json = e.users;
+                    Ti.API.info("Success:\\nCount: " + e.users.length);
+                }
+            } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+            cb.call(this, json);
+        });
     }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
@@ -217,33 +237,17 @@ function Controller() {
         id: "play"
     }), "Button", $.__views.homeView);
     $.__views.homeView.add($.__views.play);
-    $.__views.standings = A$(Ti.UI.createButton({
-        top: 10,
-        left: 10,
-        right: 10,
-        style: 0,
-        backgroundColor: "#B20838",
-        height: 43,
-        font: {
-            fontWeight: "bold",
-            fontSize: 24
-        },
-        title: "Standings",
-        id: "standings"
-    }), "Button", $.__views.homeView);
-    $.__views.homeView.add($.__views.standings);
     $.__views.post = A$(Ti.UI.createTextArea({
         top: 20,
         left: "5dp",
         right: "5dp",
         height: 80,
-        editable: !1,
         font: {
             fontSize: "14dp"
         },
         autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
         autocorrect: !0,
-        visible: !1,
+        visible: !0,
         id: "post"
     }), "TextArea", $.__views.homeView);
     $.__views.homeView.add($.__views.post);
@@ -252,7 +256,7 @@ function Controller() {
         backgroundImage: "/images/post/btn-facebook-off.png",
         height: "30dp",
         width: "30dp",
-        visible: !1,
+        visible: !0,
         id: "facebook"
     }), "View", $.__views.homeView);
     $.__views.homeView.add($.__views.facebook);
@@ -262,7 +266,7 @@ function Controller() {
         backgroundImage: "/images/post/btn-twitter-off.png",
         height: "30dp",
         width: "30dp",
-        visible: !1,
+        visible: !0,
         id: "twitter"
     }), "View", $.__views.homeView);
     $.__views.homeView.add($.__views.twitter);
@@ -273,7 +277,7 @@ function Controller() {
         height: "30dp",
         backgroundImage: "/images/post/btn-post-default.png",
         backgroundSelectedImage: "/images/post/btn-post-pressed.png",
-        visible: !1,
+        visible: !0,
         id: "submit"
     }), "Button", $.__views.homeView);
     $.__views.homeView.add($.__views.submit);
@@ -288,7 +292,6 @@ function Controller() {
     });
     Ti.Facebook.permissions = [ "publish_stream" ];
     $.play.addEventListener("click", playHandler);
-    $.standings.addEventListener("click", standingsHandler);
     var fbOn = !1;
     $.facebook.on("click", function() {
         if (!fbOn) {
@@ -319,10 +322,28 @@ function Controller() {
             $.twitter.backgroundImage = "/images/post/btn-twitter-off.png";
         }
     });
+    $.post.on("focus", function() {
+        $.homeWindow.top = -120;
+        $.homeWindow.animate({
+            bottom: 166,
+            duration: 500
+        });
+    });
+    $.post.on("blur", function() {
+        $.homeWindow.top = 0;
+        $.homeWindow.animate({
+            bottom: 0,
+            duration: 500
+        });
+    });
+    $.homeWindow.on("click", function() {
+        $.post.blur();
+    });
     $.submit.on("click", function() {
         var currentPost = $.post.value, args = {
             success: function(ev) {
                 alert("success posting");
+                $.post.value = "";
             },
             error: function(ev) {
                 alert(ev);
@@ -334,7 +355,12 @@ function Controller() {
         fbOn && User.facebookPost(args);
     });
     $.homeWindow.open();
-    (!Ti.App.Properties.getString("username") || debug) && addFBLogin();
+    !Ti.App.Properties.getString("username") || debug ? addFBLogin() : getUser(function(json) {
+        if (!json) {
+            Ti.App.Properties.setString("username", undefined);
+            addFBLogin();
+        }
+    });
     _.extend($, exports);
 }
 

@@ -45,27 +45,26 @@
 	height:'30dp',
 	backgroundImage:'/images/post/btn-post-default.png',
 	backgroundSelectedImage:'/images/post/btn-post-pressed.png',
-	visible:false
+	visible:true
 },
 '#post': {
 	top: 20,
 	left:'5dp',
 	right:'5dp',
 	height: 80,
-	editable: false,
 	font: {
 		fontSize:'14dp'
 	},
 	autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE,
     autocorrect: true,
-    visible:false
+    visible:true
 },
 '#facebook': {
 	top: 30,
 	backgroundImage:'/images/post/btn-facebook-off.png',
 	height:'30dp',
 	width:'30dp',
-	visible:false
+	visible:true
 },
 '#twitter': {
 	top: -30,
@@ -73,7 +72,7 @@
 	backgroundImage:'/images/post/btn-twitter-off.png',
 	height:'30dp',
 	width:'30dp',
-	visible:false
+	visible:true
 }
 
 	
