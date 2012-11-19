@@ -1,24 +1,18 @@
 function Controller() {
-    function getUserInfo() {
-        Ti.Facebook.requestWithGraphPath("me", {}, "GET", function(e) {
-            if (e.success) {
-                Ti.API.info(e.result);
-                alert(e.result);
-            } else e.error ? alert(e.error) : alert("Unknown response");
-        });
-    }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
+    $.__views.container = A$(Ti.UI.createView({
+        layout: "vertical",
+        id: "container"
+    }), "View", null);
+    $.addTopLevelView($.__views.container);
     _.extend($, $.__views);
     var fb = Ti.Facebook.createLoginButton({
         top: 20,
         style: Ti.Facebook.BUTTON_STYLE_WIDE
     });
     Ti.Facebook.addEventListener("login", function(e) {
-        if (e.success) {
-            getUserInfo();
-            alert("Logged in");
-        }
+        e.success && alert("Logged in");
     });
     $.container.add(fb);
     _.extend($, exports);

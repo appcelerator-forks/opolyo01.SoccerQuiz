@@ -15,7 +15,6 @@ User.confirmLogin = function() {
 };
 
 User.confirmLogin.toFacebook = function() {
-    alert("you are " + Ti.Facebook.loggedIn);
     return Ti.Facebook.loggedIn;
 };
 
@@ -25,7 +24,6 @@ User.confirmLogin.toTwitter = function() {
 
 User.linkToFacebook = function(cb) {
     Ti.Facebook.addEventListener("login", function(e) {
-        alert(e);
         cb && cb(e);
     });
     Ti.Facebook.authorize();
@@ -74,60 +72,78 @@ User.facebookPost = function(args) {
     });
 };
 
-User.login = function(username, password, success, error) {
-    if (!Ti.Network.online) {
-        error({
-            success: !1
-        });
-        return;
-    }
-    var xhr = Ti.Network.createHTTPClient();
-    xhr.onload = function() {
-        Ti.API.info("Status Code: " + xhr.status);
-        Ti.API.info("Set-Cookie: " + xhr.getResponseHeader("Set-Cookie"));
-        Ti.API.info("responseText: " + xhr.responseText);
-        try {
-            if (xhr.status == 200) {
-                var sessionId = "", userDetails;
-                if (this.responseText) {
-                    Ti.App.Properties.setString("networkDetails", this.responseText);
-                    userDetails = JSON.parse(this.responseText);
-                    sessionId = userDetails.sid;
-                }
-                Cloud.SocialIntegrations.externalAccountLogin({
-                    id: userDetails.guid,
-                    type: "appc",
-                    token: sessionId
-                }, function(e) {
-                    if (e.success) {
-                        Ti.App.Properties.setString("sessionId", Cloud.sessionId);
-                        success(userDetails);
-                    } else {
-                        Ti.API.error("Social Integration Error: " + e);
-                        error(xhr);
-                    }
-                });
-            } else {
-                Ti.API.error("Error code received from server: " + xhr);
-                error(xhr);
-            }
-        } catch (e) {
-            Ti.API.error("Exception processing response: " + e);
-            error(xhr);
+User.login = function() {
+    Cloud.Users.login({
+        login: "opolyo01@yahoo.com",
+        password: "mysecurepassword"
+    }, function(e) {
+        e.success ? Ti.API.info("loggedin into ACS") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+    });
+};
+
+User.update = function(obj, json) {
+    Cloud.Objects.update({
+        classname: "users",
+        id: obj.id,
+        fields: json
+    }, function(e) {
+        e.success ? Ti.API.info("added quiz results") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+    });
+};
+
+User.getUser = function(cb) {
+    var json;
+    Cloud.Objects.query({
+        classname: "users",
+        page: 1,
+        per_page: 10,
+        where: {
+            username: Ti.App.Properties.getString("username")
         }
+    }, function(e) {
+        if (e.success) {
+            if (e.users.length > 0) {
+                json = e.users;
+                Ti.API.info("Success:\\nCount: " + e.users.length);
+            }
+        } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+        cb.call(this, json);
+    });
+};
+
+User.isUserRegistered = function(username, cb) {
+    var json = {
+        exist: !1
     };
-    xhr.onerror = function() {
-        Ti.API.error("Login Request Error:");
-        Ti.API.error("Status Code: " + xhr.status);
-        Ti.API.error("Set-Cookie: " + xhr.getResponseHeader("Set-Cookie"));
-        Ti.API.error("responseText: " + xhr.responseText);
-        error(xhr);
-    };
-    xhr.open("POST", "https://api.appcelerator.net/p/v1/sso-login");
-    xhr.send({
-        un: username,
-        pw: password,
-        mid: Ti.Platform.id
+    Cloud.Objects.query({
+        classname: "users",
+        page: 1,
+        per_page: 10,
+        where: {
+            username: username
+        }
+    }, function(e) {
+        if (e.success) {
+            Ti.API.info("Success:\\nCount: " + e.users.length);
+            e.users.length > 0 && (json = {
+                exist: !0
+            });
+        }
+        cb.call(this, json);
+    });
+};
+
+User.insertUserACS = function(json) {
+    User.isUserRegistered(json.username, function(resp) {
+        if (!resp.exist) {
+            var acsJson = {
+                classname: "users",
+                fields: json
+            };
+            Cloud.Objects.create(acsJson, function(e) {
+                e.success ? Ti.API.info(e) : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+            });
+        } else alert("this username already exist pick another one");
     });
 };
 

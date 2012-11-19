@@ -3,29 +3,13 @@ var
 	User = require('User'),
 	Cloud = require('ti.cloud'),
 	config = require("config"),
-	debug = false;
+	debug = true;
 	
 config.setup();
-
-Cloud.Users.login({
-    login: 'opolyo01@yahoo.com',
-    password: 'mysecurepassword'
-}, function (e) {
-    if (e.success) {
-       Ti.API.info("loggedin into ACS");
-    } 
-    else {
-        alert('Error:\\n' +
-            ((e.error && e.message) || JSON.stringify(e)));
-    }
-});
-
-//Ti.App.Properties.setString("username", undefined);
+User.login();
 
 Ti.Facebook.permissions = ['publish_stream'];
-
 $.play.addEventListener("click", playHandler);
-//$.standings.addEventListener("click", standingsHandler);
 
 function playHandler(){
 	$.game = Alloy.createController('game');
@@ -33,61 +17,6 @@ function playHandler(){
 	$.game.container.left = -320;
 	$.game.container.animate({left:0, duration:1500});
 	$.homeView.animate({left:320, duration:1000},function(){$.homeWindow.remove($.homeView);});
-}
-
-// function standingsHandler(){
-	// if(!Ti.App.Properties.getString("username")){
-		// addFBLogin();
-	// }
-	// else{
-		// $.standings = Alloy.createController('standings');
-		// $.homeWindow.add($.standings.container);
-		// $.standings.container.left = -320;
-		// $.standings.container.animate({left:0, duration:1500});
-		// $.homeView.animate({left:320, duration:1000},function(){$.homeWindow.remove($.homeView);});
-	// }
-// }
-
-function isUserRegistered(username, cb){
-	var json = {exist: false};
-	Cloud.Objects.query({
-		classname : 'users',
-		page: 1,
-	    per_page: 10,
-	    where: {
-	        "username": username
-	    }
-	}, function(e) {
-		if (e.success) {
-			Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
-			if(e.users.length > 0){
-				json = {exist: true};
-			}
-		} 
-		cb.call(this, json);
-	}); 
-}
-
-function insertUserACS(json) {
-	isUserRegistered(json.username, function(resp){
-		if(!resp.exist){
-			var acsJson = {
-				"classname" : "users",
-				"fields" : json
-			};
-			Cloud.Objects.create(acsJson, function(e) {
-				if (e.success) {
-					Ti.API.info(e);
-				} 
-				else {
-					alert('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
-				}
-			});
-		}
-		else{
-			alert("this username already exist pick another one");
-		}
-	});
 }
 
 function addFBLogin(){
@@ -111,7 +40,6 @@ function addFBLogin(){
 			if (e.success) {
 				var json = JSON.parse(e.result);
 				username.value = json.username;
-				//insertUserACS(json);
 			} else if (e.error) {
 				alert(e.error);
 			} else {
@@ -184,7 +112,7 @@ function addFBLogin(){
 	});
     registerButton.addEventListener('click', function() {
     	Ti.App.Properties.setString("username", username.value);
-    	insertUserACS({"username": username.value});
+    	User.insertUserACS({"username": username.value});
     	Ti.App.Properties.setString("username", username.value);
         wina.close();
     });
@@ -278,35 +206,13 @@ $.submit.on('click', function() {
 	}
 });
 
-function getUser(cb){
-	var json;
-	Cloud.Objects.query({
-		classname : 'users',
-		page: 1,
-	    per_page: 10,
-	    where: {
-	        "username": Ti.App.Properties.getString("username")
-	    }
-	}, function(e) {
-		if (e.success) {
-			if(e.users.length > 0){
-				json = e.users;
-				Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
-			}
-		} 
-		else {
-			Ti.API.info('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
-		}
-		cb.call(this, json);
-	}); 
-}
-
+$.tabGroup.open();
 $.homeWindow.open();
 if(!Ti.App.Properties.getString("username") || debug){
 	addFBLogin();
 }
 else{
-	getUser(function(json){
+	User.getUser(function(json){
 		if(!json){
 			Ti.App.Properties.setString("username", undefined);
 			addFBLogin();

@@ -113,27 +113,8 @@ function Controller() {
         index.twitter.visible = !0;
         index.submit.visible = !0;
     }
-    function getUser(cb) {
-        var json;
-        Cloud.Objects.query({
-            classname: "users",
-            page: 1,
-            per_page: 10,
-            where: {
-                username: Ti.App.Properties.getString("username")
-            }
-        }, function(e) {
-            if (e.success) {
-                if (e.users.length > 0) {
-                    json = e.users;
-                    Ti.API.info("Success:\\nCount: " + e.users.length);
-                }
-            } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-            cb.call(this, json);
-        });
-    }
     function updateTotal() {
-        getUser(function(json) {
+        User.getUser(function(json) {
             if (!json) showAnswerPage(); else {
                 var obj = json[0], quizResults = obj.quizResults ? obj.quizResults : [], total = 0;
                 quizResults.push(correctAnswers);
@@ -142,15 +123,9 @@ function Controller() {
                 });
                 totalPoints = total;
                 showAnswerPage();
-                obj && Cloud.Objects.update({
-                    classname: "users",
-                    id: obj.id,
-                    fields: {
-                        totalPoints: total,
-                        quizResults: quizResults
-                    }
-                }, function(e) {
-                    e.success ? Ti.API.info("added quiz results") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+                obj && User.update(obj, {
+                    totalPoints: total,
+                    quizResults: quizResults
                 });
             }
         });
@@ -316,7 +291,7 @@ function Controller() {
     }), "Button", $.__views.gameView);
     $.__views.gameView.add($.__views.answer3);
     $.__views.timer = A$(Ti.UI.createLabel({
-        top: 50,
+        top: 25,
         textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
         font: {
             fontSize: 20,
@@ -392,7 +367,7 @@ function Controller() {
     }), "Button", $.__views.gameViewBack);
     $.__views.gameViewBack.add($.__views.answer3Back);
     $.__views.timerBack = A$(Ti.UI.createLabel({
-        top: 50,
+        top: 25,
         textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
         font: {
             fontSize: 20,
@@ -405,7 +380,7 @@ function Controller() {
     }), "Label", $.__views.gameViewBack);
     $.__views.gameViewBack.add($.__views.timerBack);
     _.extend($, $.__views);
-    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, idx, totalPoints = 0, Cloud = require("ti.cloud"), quizList = require("data").list, numberQuestions = quizList.length;
+    var front = !1, neutral = "#B20838", good = "#49FF1C", wrong = "#FF0000", timer = 10, intervalId = 0, curQuestion = 0, correctAnswers = 0, idx, totalPoints = 0, Cloud = require("ti.cloud"), User = require("User"), quizList = require("data").list, numberQuestions = quizList.length;
     showNextQuestion("start");
     _.extend($, exports);
 }

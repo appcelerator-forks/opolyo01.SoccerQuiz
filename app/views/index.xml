@@ -1,18 +1,35 @@
 <Alloy>
-  <Window id="homeWindow" exitOnClose="true">
-  	<View id="homeView">
-	  	<Label id="headingLabel">Check your soccer knowledge</Label>
-		<Label id="line1" class="resultLabel">Congrats, well done!</Label>
-		<Label id="line2" class="resultLabel">you answered 5 out 8 questions</Label>
-		<Label id="line3" class="resultLabel">What do you want to do next?</Label>
-	    <Button id="play" class="homeButton">Take Quiz</Button>
-	    <!-- <Button id="standings" class="homeButton">Standings</Button> -->
-	    
-	    <TextArea id="post"/>
-	    <View id="facebook"/>
-	    <View id="twitter"/>
-	    <Button id="submit"/>
-		
-	</View>
-  </Window>
+  <TabGroup backgroundColor="#000" id="tabGroup">
+    <Tab id="tab1" title="Home" icon="KS_nav_views.png">
+        <Window id="homeWindow" exitOnClose="true"  navBarHidden="true">
+		  	<View id="homeView">
+			  	<Label id="headingLabel">Check your soccer knowledge</Label>
+				<Label id="line1" class="resultLabel">Congrats, well done!</Label>
+				<Label id="line2" class="resultLabel">you answered 5 out 8 questions</Label>
+				<Label id="line3" class="resultLabel">What do you want to do next?</Label>
+			    <Button id="play" class="homeButton">Take Quiz</Button>
+			    <!-- <Button id="standings" class="homeButton">Standings</Button> -->
+			    
+			    <TextArea id="post"/>
+			    <View id="facebook"/>
+			    <View id="twitter"/>
+			    <Button id="submit"/>
+				
+			</View>
+  		</Window>
+    </Tab>
+    
+    <Tab id="tab2" title="Standing" icon="KS_nav_views.png">
+        <Window id="win3"  navBarHidden="true">
+        	<Require id="standings" src="standings"/>
+        </Window>
+    </Tab>
+    
+    <Tab id="tab3" title="Settings" icon="KS_nav_views.png">
+        <Window id="win3"  navBarHidden="true">
+            <Require id="settings" src="settings"/>
+        </Window>
+    </Tab>
+    <!-- Use the Require tag to include external Ti.UI.Tab views -->
+	</TabGroup>
 </Alloy>

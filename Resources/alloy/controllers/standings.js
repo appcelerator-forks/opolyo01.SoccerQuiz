@@ -1,7 +1,4 @@
 function Controller() {
-    function goBack() {
-        var index = Alloy.createController("index");
-    }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
     $.__views.container = A$(Ti.UI.createView({
@@ -10,13 +7,6 @@ function Controller() {
         id: "container"
     }), "View", null);
     $.addTopLevelView($.__views.container);
-    $.__views.backButton = A$(Ti.UI.createButton({
-        top: 10,
-        left: 10,
-        title: "Back",
-        id: "backButton"
-    }), "Button", $.__views.container);
-    $.__views.container.add($.__views.backButton);
     var __alloyId1 = [];
     $.__views.sectionFruit = A$(Ti.UI.createTableViewSection({
         id: "sectionFruit",
@@ -44,13 +34,11 @@ function Controller() {
     }), "TableViewRow", $.__views.sectionFruit);
     $.__views.sectionFruit.add($.__views.__alloyId5);
     $.__views.table = A$(Ti.UI.createTableView({
-        top: 70,
         data: __alloyId1,
         id: "table"
     }), "TableView", $.__views.container);
     $.__views.container.add($.__views.table);
     _.extend($, $.__views);
-    $.backButton.addEventListener("click", goBack);
     _.extend($, exports);
 }
 

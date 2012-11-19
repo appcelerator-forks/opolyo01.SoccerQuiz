@@ -14,40 +14,6 @@ function Controller() {
             $.homeWindow.remove($.homeView);
         });
     }
-    function isUserRegistered(username, cb) {
-        var json = {
-            exist: !1
-        };
-        Cloud.Objects.query({
-            classname: "users",
-            page: 1,
-            per_page: 10,
-            where: {
-                username: username
-            }
-        }, function(e) {
-            if (e.success) {
-                Ti.API.info("Success:\\nCount: " + e.users.length);
-                e.users.length > 0 && (json = {
-                    exist: !0
-                });
-            }
-            cb.call(this, json);
-        });
-    }
-    function insertUserACS(json) {
-        isUserRegistered(json.username, function(resp) {
-            if (!resp.exist) {
-                var acsJson = {
-                    classname: "users",
-                    fields: json
-                };
-                Cloud.Objects.create(acsJson, function(e) {
-                    e.success ? Ti.API.info(e) : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-                });
-            } else alert("this username already exist pick another one");
-        });
-    }
     function addFBLogin() {
         function getUserInfo() {
             Ti.Facebook.requestWithGraphPath("me", {}, "GET", function(e) {
@@ -138,7 +104,7 @@ function Controller() {
         });
         registerButton.addEventListener("click", function() {
             Ti.App.Properties.setString("username", username.value);
-            insertUserACS({
+            User.insertUserACS({
                 username: username.value
             });
             Ti.App.Properties.setString("username", username.value);
@@ -152,33 +118,18 @@ function Controller() {
         wina.add(registerButton);
         wina.open();
     }
-    function getUser(cb) {
-        var json;
-        Cloud.Objects.query({
-            classname: "users",
-            page: 1,
-            per_page: 10,
-            where: {
-                username: Ti.App.Properties.getString("username")
-            }
-        }, function(e) {
-            if (e.success) {
-                if (e.users.length > 0) {
-                    json = e.users;
-                    Ti.API.info("Success:\\nCount: " + e.users.length);
-                }
-            } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
-            cb.call(this, json);
-        });
-    }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
+    $.__views.tabGroup = A$(Ti.UI.createTabGroup({
+        backgroundColor: "#000",
+        id: "tabGroup"
+    }), "TabGroup", null);
     $.__views.homeWindow = A$(Ti.UI.createWindow({
         backgroundColor: "#000",
         id: "homeWindow",
-        exitOnClose: "true"
+        exitOnClose: "true",
+        navBarHidden: "true"
     }), "Window", null);
-    $.addTopLevelView($.__views.homeWindow);
     $.__views.homeView = A$(Ti.UI.createView({
         backgroundColor: "#000",
         layout: "vertical",
@@ -281,15 +232,48 @@ function Controller() {
         id: "submit"
     }), "Button", $.__views.homeView);
     $.__views.homeView.add($.__views.submit);
-    _.extend($, $.__views);
-    var Status = require("Status"), User = require("User"), Cloud = require("ti.cloud"), config = require("config"), debug = !1;
-    config.setup();
-    Cloud.Users.login({
-        login: "opolyo01@yahoo.com",
-        password: "mysecurepassword"
-    }, function(e) {
-        e.success ? Ti.API.info("loggedin into ACS") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+    $.__views.tab1 = A$(Ti.UI.createTab({
+        window: $.__views.homeWindow,
+        id: "tab1",
+        title: "Home",
+        icon: "KS_nav_views.png"
+    }), "Tab", null);
+    $.__views.tabGroup.addTab($.__views.tab1);
+    $.__views.win3 = A$(Ti.UI.createWindow({
+        id: "win3",
+        navBarHidden: "true"
+    }), "Window", null);
+    $.__views.standings = Alloy.createController("standings", {
+        id: "standings"
     });
+    $.__views.standings.setParent($.__views.win3);
+    $.__views.tab2 = A$(Ti.UI.createTab({
+        window: $.__views.win3,
+        id: "tab2",
+        title: "Standing",
+        icon: "KS_nav_views.png"
+    }), "Tab", null);
+    $.__views.tabGroup.addTab($.__views.tab2);
+    $.__views.win3 = A$(Ti.UI.createWindow({
+        id: "win3",
+        navBarHidden: "true"
+    }), "Window", null);
+    $.__views.settings = Alloy.createController("settings", {
+        id: "settings"
+    });
+    $.__views.settings.setParent($.__views.win3);
+    $.__views.tab3 = A$(Ti.UI.createTab({
+        window: $.__views.win3,
+        id: "tab3",
+        title: "Settings",
+        icon: "KS_nav_views.png"
+    }), "Tab", null);
+    $.__views.tabGroup.addTab($.__views.tab3);
+    $.addTopLevelView($.__views.tabGroup);
+    _.extend($, $.__views);
+    var Status = require("Status"), User = require("User"), Cloud = require("ti.cloud"), config = require("config"), debug = !0;
+    config.setup();
+    User.login();
     Ti.Facebook.permissions = [ "publish_stream" ];
     $.play.addEventListener("click", playHandler);
     var fbOn = !1;
@@ -354,8 +338,9 @@ function Controller() {
         twitterOn && User.tweet(args);
         fbOn && User.facebookPost(args);
     });
+    $.tabGroup.open();
     $.homeWindow.open();
-    !Ti.App.Properties.getString("username") || debug ? addFBLogin() : getUser(function(json) {
+    !Ti.App.Properties.getString("username") || debug ? addFBLogin() : User.getUser(function(json) {
         if (!json) {
             Ti.App.Properties.setString("username", undefined);
             addFBLogin();

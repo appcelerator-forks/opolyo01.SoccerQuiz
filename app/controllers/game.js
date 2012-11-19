@@ -9,6 +9,7 @@ var	front = false,
 	idx,
 	totalPoints = 0,
 	Cloud = require('ti.cloud'),
+	User = require('User'),
 	quizList = require("data").list,
 	numberQuestions = quizList.length;
 	
@@ -179,32 +180,8 @@ function showAnswerPage(){
     index.submit.visible = true;
 }
 
-
-function getUser(cb){
-	var json;
-	Cloud.Objects.query({
-		classname : 'users',
-		page: 1,
-	    per_page: 10,
-	    where: {
-	        "username": Ti.App.Properties.getString("username")
-	    }
-	}, function(e) {
-		if (e.success) {
-			if(e.users.length > 0){
-				json = e.users;
-				Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
-			}
-		} 
-		else {
-			Ti.API.info('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
-		}
-		cb.call(this, json);
-	}); 
-
-}
 function updateTotal(){
-	getUser(function(json){
+	User.getUser(function(json){
 		if(!json){
 			showAnswerPage();
 		}
@@ -218,20 +195,7 @@ function updateTotal(){
 			
 			showAnswerPage();
 			if(obj){
-				Cloud.Objects.update({
-					classname : 'users',
-						id : obj.id,
-						fields : {
-							totalPoints :total,
-							quizResults : quizResults
-						}
-					}, function(e) {
-						if (e.success) {
-							Ti.API.info("added quiz results");
-						} else {
-							alert('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
-						}
-				}); 
+				User.update(obj, {totalPoints :total, quizResults : quizResults});
 			}
 		}
 	});

@@ -11,10 +11,6 @@ var twitter = social.create({
 //Empty constructor (for now)
 function User() {}
 
-/*
- * Static model functions
- */
-
 //Check for a current login session ID - if we have one, configure cloud, if not, return false
 User.confirmLogin = function() {
 	var auth = false;
@@ -29,7 +25,6 @@ User.confirmLogin = function() {
 
 //Check social login
 User.confirmLogin.toFacebook = function() {
-	alert("you are "+Ti.Facebook.loggedIn);
 	return Ti.Facebook.loggedIn;
 };
 
@@ -40,7 +35,6 @@ User.confirmLogin.toTwitter = function() {
 //Link to Facebook
 User.linkToFacebook = function(cb) {
 	Ti.Facebook.addEventListener('login', function(e) {
-		alert(e);
 		cb && cb(e);
 	});
 	Ti.Facebook.authorize();
@@ -122,74 +116,98 @@ User.facebookPost = function(args) {
 	}
 };
 
-//Log in an Appcelerator network user
-User.login = function(username, password, success, error) {
-	if (!Ti.Network.online) {
-		error({
-			success:false
-		});
-		return;
-	}
-	
-	var xhr = Ti.Network.createHTTPClient();
 
-	//Parity issue: iOS fires onload for 4xx and 3xx status codes, so need to manually check onload
-	xhr.onload = function() {
-		Ti.API.info('Status Code: ' + xhr.status);
-		Ti.API.info('Set-Cookie: ' + xhr.getResponseHeader('Set-Cookie'));
-		Ti.API.info('responseText: ' + xhr.responseText);
-		try {
-			if (xhr.status == 200) {
-				var sessionId = '', userDetails;
-
-				if (this.responseText) {
-					//throw in network details for later use
-					Ti.App.Properties.setString('networkDetails', this.responseText);
-					userDetails = JSON.parse(this.responseText);
-					sessionId = userDetails.sid;
-				}
-
-				//Associate an Appcelerator developer login with an ACS account
-				Cloud.SocialIntegrations.externalAccountLogin({
-					id : userDetails.guid,
-					type : 'appc',
-					token : sessionId
-				}, function(e) {
-					if (e.success) {
-						//Store the current value of the Cloud session for later use, and notify app of success
-						Ti.App.Properties.setString('sessionId', Cloud.sessionId);
-						success(userDetails);
-					} else {
-						Ti.API.error('Social Integration Error: ' + e);
-						error(xhr);
-					}
-				});
-			} else {
-				Ti.API.error('Error code received from server: ' + xhr);
-				error(xhr);
-			}
-		} catch(e) {
-			Ti.API.error('Exception processing response: ' + e);
-			error(xhr);
-		}
-	};
-
-	xhr.onerror = function() {
-		Ti.API.error('Login Request Error:');
-		Ti.API.error('Status Code: ' + xhr.status);
-		Ti.API.error('Set-Cookie: ' + xhr.getResponseHeader('Set-Cookie'));
-		Ti.API.error('responseText: ' + xhr.responseText);
-		error(xhr);
-	};
-
-	xhr.open('POST', 'https://api.appcelerator.net/p/v1/sso-login');
-	xhr.send({
-		un : username,
-		pw : password,
-		mid : Ti.Platform.id
+User.login = function(){
+	Cloud.Users.login({
+	    login: 'opolyo01@yahoo.com',
+	    password: 'mysecurepassword'
+	}, function (e) {
+	    if (e.success) {
+	       Ti.API.info("loggedin into ACS");
+	    } 
+	    else {
+	        alert('Error:\\n' +
+	            ((e.error && e.message) || JSON.stringify(e)));
+	    }
 	});
 };
 
+User.update = function(obj, json){
+	Cloud.Objects.update({
+		classname : 'users',
+			id : obj.id,
+			fields : json
+		}, function(e) {
+			if (e.success) {
+				Ti.API.info("added quiz results");
+			} else {
+				alert('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
+			}
+	}); 
+};
+User.getUser = function(cb){
+	var json;
+	Cloud.Objects.query({
+		classname : 'users',
+		page: 1,
+	    per_page: 10,
+	    where: {
+	        "username": Ti.App.Properties.getString("username")
+	    }
+	}, function(e) {
+		if (e.success) {
+			if(e.users.length > 0){
+				json = e.users;
+				Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
+			}
+		} 
+		else {
+			Ti.API.info('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
+		}
+		cb.call(this, json);
+	}); 
+};
+User.isUserRegistered = function(username, cb){
+	var json = {exist: false};
+	Cloud.Objects.query({
+		classname : 'users',
+		page: 1,
+	    per_page: 10,
+	    where: {
+	        "username": username
+	    }
+	}, function(e) {
+		if (e.success) {
+			Ti.API.info('Success:\\n' + 'Count: ' + e.users.length);
+			if(e.users.length > 0){
+				json = {exist: true};
+			}
+		} 
+		cb.call(this, json);
+	}); 
+};
+
+User.insertUserACS = function(json){
+	User.isUserRegistered(json.username, function(resp){
+		if(!resp.exist){
+			var acsJson = {
+				"classname" : "users",
+				"fields" : json
+			};
+			Cloud.Objects.create(acsJson, function(e) {
+				if (e.success) {
+					Ti.API.info(e);
+				} 
+				else {
+					alert('Error:\\n' + ((e.error && e.message) || JSON.stringify(e)));
+				}
+			});
+		}
+		else{
+			alert("this username already exist pick another one");
+		}
+	});
+};
 //Retrieve user network details
 User.getUserDetails = function() {
 	var deets;
