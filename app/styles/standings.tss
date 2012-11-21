@@ -1,4 +1,3 @@
 "#container": {
-	backgroundColor: "#fff",
-	layout: "vetical"
+	backgroundColor: "#fff"
 }

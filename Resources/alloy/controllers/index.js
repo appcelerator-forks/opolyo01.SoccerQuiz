@@ -1,4 +1,16 @@
 function Controller() {
+    function loadQuizes(json) {
+        for (var i = 0, iL = quizList.length; i < iL; ++i) {
+            console.log(quizList[i]);
+            var acsJson = {
+                classname: "quizes",
+                fields: quizList[i]
+            };
+            Cloud.Objects.create(acsJson, function(e) {
+                console.log(e);
+            });
+        }
+    }
     function playHandler() {
         $.game = Alloy.createController("game");
         $.homeWindow.add($.game.container);
@@ -13,110 +25,6 @@ function Controller() {
         }, function() {
             $.homeWindow.remove($.homeView);
         });
-    }
-    function addFBLogin() {
-        function getUserInfo() {
-            Ti.Facebook.requestWithGraphPath("me", {}, "GET", function(e) {
-                if (e.success) {
-                    var json = JSON.parse(e.result);
-                    username.value = json.username;
-                } else e.error ? alert(e.error) : alert("Unknown response");
-            });
-        }
-        var fb = Ti.Facebook.createLoginButton({
-            top: 40,
-            style: Ti.Facebook.BUTTON_STYLE_WIDE
-        });
-        Ti.Facebook.addEventListener("login", function(e) {
-            e.success && getUserInfo();
-        });
-        Ti.Facebook.getLoggedIn() && getUserInfo();
-        var wina = Ti.UI.createWindow({
-            backgroundColor: "#fff",
-            modal: !0,
-            layout: "vertical",
-            title: "Register"
-        }), closeButton = Titanium.UI.createButton({
-            title: "Close",
-            width: 100,
-            height: 25
-        }), registerButton = Titanium.UI.createButton({
-            title: "Register",
-            width: 200,
-            height: 40,
-            top: 20,
-            left: 40
-        }), heading = Ti.UI.createLabel({
-            top: 20,
-            style: 0,
-            color: "#333",
-            text: "Register to gain ability compete in standings",
-            textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-            font: {
-                fontWeight: "bold",
-                fontSize: 22
-            }
-        }), userLabel = Ti.UI.createLabel({
-            top: 20,
-            style: 0,
-            left: 40,
-            text: "Username",
-            color: "#3B5998",
-            font: {
-                fontWeight: "bold",
-                fontSize: 18
-            }
-        }), username = Titanium.UI.createTextField({
-            color: "#666666",
-            textAlign: "left",
-            left: 40,
-            width: 200,
-            top: 10,
-            height: 30,
-            font: {
-                fontWeight: "plain",
-                fontSize: 14
-            },
-            autocorrect: !1,
-            borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
-            keyboardType: Titanium.UI.KEYBOARD_ASCII,
-            autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE
-        });
-        closeButton.addEventListener("click", function() {
-            wina.close();
-        });
-        username.addEventListener("focus", function() {
-            wina.top = -120;
-            wina.animate({
-                bottom: 166,
-                duration: 500
-            });
-        });
-        username.addEventListener("blur", function() {
-            wina.top = 0;
-            wina.animate({
-                bottom: 0,
-                duration: 500
-            });
-        });
-        wina.addEventListener("click", function() {
-            username.blur();
-        });
-        registerButton.addEventListener("click", function() {
-            Ti.App.Properties.setString("username", username.value);
-            User.insertUserACS({
-                username: username.value
-            });
-            Ti.App.Properties.setString("username", username.value);
-            wina.close();
-        });
-        wina.setLeftNavButton(closeButton);
-        wina.add(heading);
-        wina.add(fb);
-        wina.add(userLabel);
-        wina.add(username);
-        wina.add(registerButton);
-        wina.open();
     }
     require("alloy/controllers/BaseController").apply(this, Array.prototype.slice.call(arguments));
     var $ = this, exports = {};
@@ -241,7 +149,7 @@ function Controller() {
     $.__views.tabGroup.addTab($.__views.tab1);
     $.__views.win3 = A$(Ti.UI.createWindow({
         id: "win3",
-        navBarHidden: "true"
+        title: "Standing"
     }), "Window", null);
     $.__views.standings = Alloy.createController("standings", {
         id: "standings"
@@ -256,7 +164,7 @@ function Controller() {
     $.__views.tabGroup.addTab($.__views.tab2);
     $.__views.win3 = A$(Ti.UI.createWindow({
         id: "win3",
-        navBarHidden: "true"
+        title: "Settings"
     }), "Window", null);
     $.__views.settings = Alloy.createController("settings", {
         id: "settings"
@@ -271,9 +179,9 @@ function Controller() {
     $.__views.tabGroup.addTab($.__views.tab3);
     $.addTopLevelView($.__views.tabGroup);
     _.extend($, $.__views);
-    var Status = require("Status"), User = require("User"), Cloud = require("ti.cloud"), config = require("config"), debug = !0;
+    var Status = require("Status"), User = require("User"), Cloud = require("ti.cloud"), config = require("config"), ui = require("ui"), quizList = require("data").list, debug = !1;
     config.setup();
-    User.login();
+    User.login(function(json) {});
     Ti.Facebook.permissions = [ "publish_stream" ];
     $.play.addEventListener("click", playHandler);
     var fbOn = !1;
@@ -338,12 +246,14 @@ function Controller() {
         twitterOn && User.tweet(args);
         fbOn && User.facebookPost(args);
     });
+    $.tab2.on("focus", function() {
+        (!Ti.App.Properties.getString("username") || debug) && ui.FBLogin();
+    });
     $.tabGroup.open();
-    $.homeWindow.open();
-    !Ti.App.Properties.getString("username") || debug ? addFBLogin() : User.getUser(function(json) {
+    !Ti.App.Properties.getString("username") || debug ? ui.FBLogin() : User.getUser(function(json) {
         if (!json) {
             Ti.App.Properties.setString("username", undefined);
-            addFBLogin();
+            ui.FBLogin();
         }
     });
     _.extend($, exports);

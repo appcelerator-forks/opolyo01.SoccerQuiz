@@ -3,42 +3,57 @@ function Controller() {
     var $ = this, exports = {};
     $.__views.container = A$(Ti.UI.createView({
         backgroundColor: "#fff",
-        layout: "vetical",
         id: "container"
     }), "View", null);
     $.addTopLevelView($.__views.container);
-    var __alloyId1 = [];
-    $.__views.sectionFruit = A$(Ti.UI.createTableViewSection({
-        id: "sectionFruit",
-        headerTitle: "Top Performers"
-    }), "TableViewSection", null);
-    __alloyId1.push($.__views.sectionFruit);
-    $.__views.__alloyId2 = A$(Ti.UI.createTableViewRow({
-        title: "Oleg",
-        id: "__alloyId2"
-    }), "TableViewRow", $.__views.sectionFruit);
-    $.__views.sectionFruit.add($.__views.__alloyId2);
-    $.__views.__alloyId3 = A$(Ti.UI.createTableViewRow({
-        title: "Mike",
-        id: "__alloyId3"
-    }), "TableViewRow", $.__views.sectionFruit);
-    $.__views.sectionFruit.add($.__views.__alloyId3);
-    $.__views.__alloyId4 = A$(Ti.UI.createTableViewRow({
-        title: "Sam",
-        id: "__alloyId4"
-    }), "TableViewRow", $.__views.sectionFruit);
-    $.__views.sectionFruit.add($.__views.__alloyId4);
-    $.__views.__alloyId5 = A$(Ti.UI.createTableViewRow({
-        title: "Andrew",
-        id: "__alloyId5"
-    }), "TableViewRow", $.__views.sectionFruit);
-    $.__views.sectionFruit.add($.__views.__alloyId5);
-    $.__views.table = A$(Ti.UI.createTableView({
-        data: __alloyId1,
-        id: "table"
-    }), "TableView", $.__views.container);
-    $.__views.container.add($.__views.table);
     _.extend($, $.__views);
+    var User = require("User"), data = [], tableData = [], debug = !1;
+    User.getAllUsers(function(res) {
+        data = res;
+        Ti.API.info(res);
+        for (var i = 0, iL = data.length; i < iL; ++i) {
+            var backgroundRow = "#fff";
+            Ti.App.Properties.getString("username") === data[i].username && (backgroundRow = "#363946");
+            var row = Ti.UI.createTableViewRow({
+                className: "forumEvent",
+                selectedBackgroundColor: backgroundRow,
+                backgroundColor: backgroundRow,
+                rowIndex: i,
+                height: 30
+            }), userName = Ti.UI.createLabel({
+                color: "#576996",
+                font: {
+                    fontFamily: "Arial",
+                    fontSize: 14,
+                    fontWeight: "bold"
+                },
+                text: data[i].username,
+                left: 10,
+                width: 150,
+                height: 25
+            }), totalScore = Ti.UI.createLabel({
+                color: "#576996",
+                font: {
+                    fontFamily: "Arial",
+                    fontSize: 18,
+                    fontWeight: "bold"
+                },
+                text: data[i].totalPoints + " points",
+                left: 170,
+                width: 150,
+                height: 25
+            });
+            row.add(userName);
+            row.add(totalScore);
+            tableData.push(row);
+        }
+        Ti.API.info(tableData);
+        var table = Ti.UI.createTableView({
+            top: 10,
+            data: tableData
+        });
+        $.container.add(table);
+    });
     _.extend($, exports);
 }
 

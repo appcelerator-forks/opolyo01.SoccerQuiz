@@ -1,12 +1,4 @@
 <Alloy>
 	<View id="container">
-		<TableView id="table">
-            <TableViewSection id="sectionFruit" headerTitle="Top Performers">
-                <TableViewRow title="Oleg"/>
-                <TableViewRow title="Mike"/>
-                <TableViewRow title="Sam"/>
-                <TableViewRow title="Andrew"/>
-            </TableViewSection>
-        </TableView>
 	</View>
 </Alloy>

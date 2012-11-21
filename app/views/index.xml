@@ -9,7 +9,6 @@
 				<Label id="line3" class="resultLabel">What do you want to do next?</Label>
 			    <Button id="play" class="homeButton">Take Quiz</Button>
 			    <!-- <Button id="standings" class="homeButton">Standings</Button> -->
-			    
 			    <TextArea id="post"/>
 			    <View id="facebook"/>
 			    <View id="twitter"/>
@@ -20,13 +19,13 @@
     </Tab>
     
     <Tab id="tab2" title="Standing" icon="KS_nav_views.png">
-        <Window id="win3"  navBarHidden="true">
+        <Window id="win3" title="Standing">
         	<Require id="standings" src="standings"/>
         </Window>
     </Tab>
     
     <Tab id="tab3" title="Settings" icon="KS_nav_views.png">
-        <Window id="win3"  navBarHidden="true">
+        <Window id="win3" title="Settings">
             <Require id="settings" src="settings"/>
         </Window>
     </Tab>

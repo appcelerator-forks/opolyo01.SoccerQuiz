@@ -144,7 +144,112 @@ function StatusRow(status) {
     return self;
 }
 
-var _ = require("alloy/underscore"), Backbone = require("alloy/backbone"), moment = require("moment");
+function FBLogin() {
+    function getUserInfo() {
+        Ti.Facebook.requestWithGraphPath("me", {}, "GET", function(e) {
+            if (e.success) {
+                var json = JSON.parse(e.result);
+                username.value = json.username;
+            } else e.error ? alert(e.error) : alert("Unknown response");
+        });
+    }
+    var fb = Ti.Facebook.createLoginButton({
+        top: 40,
+        style: Ti.Facebook.BUTTON_STYLE_WIDE
+    });
+    Ti.Facebook.addEventListener("login", function(e) {
+        e.success && getUserInfo();
+    });
+    Ti.Facebook.getLoggedIn() && getUserInfo();
+    var wina = Ti.UI.createWindow({
+        backgroundColor: "#fff",
+        modal: !0,
+        layout: "vertical",
+        title: "Register"
+    }), closeButton = Titanium.UI.createButton({
+        title: "Close",
+        width: 100,
+        height: 25
+    }), registerButton = Titanium.UI.createButton({
+        title: "Register",
+        width: 200,
+        height: 40,
+        top: 20,
+        left: 40
+    }), heading = Ti.UI.createLabel({
+        top: 20,
+        style: 0,
+        color: "#333",
+        text: "Register to gain ability compete in standings",
+        textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+        font: {
+            fontWeight: "bold",
+            fontSize: 22
+        }
+    }), userLabel = Ti.UI.createLabel({
+        top: 20,
+        style: 0,
+        left: 40,
+        text: "Username",
+        color: "#3B5998",
+        font: {
+            fontWeight: "bold",
+            fontSize: 18
+        }
+    }), username = Titanium.UI.createTextField({
+        color: "#666666",
+        textAlign: "left",
+        left: 40,
+        width: 200,
+        top: 10,
+        height: 30,
+        font: {
+            fontWeight: "plain",
+            fontSize: 14
+        },
+        autocorrect: !1,
+        borderStyle: Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
+        keyboardType: Titanium.UI.KEYBOARD_ASCII,
+        autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE
+    });
+    closeButton.addEventListener("click", function() {
+        wina.close();
+    });
+    username.addEventListener("focus", function() {
+        wina.top = -120;
+        wina.animate({
+            bottom: 166,
+            duration: 500
+        });
+    });
+    username.addEventListener("blur", function() {
+        wina.top = 0;
+        wina.animate({
+            bottom: 0,
+            duration: 500
+        });
+    });
+    wina.addEventListener("click", function() {
+        username.blur();
+    });
+    registerButton.addEventListener("click", function() {
+        Ti.App.Properties.setString("username", username.value);
+        User.insertUserACS({
+            username: username.value
+        });
+        Ti.App.Properties.setString("username", username.value);
+        wina.close();
+    });
+    wina.setLeftNavButton(closeButton);
+    wina.add(heading);
+    wina.add(fb);
+    wina.add(userLabel);
+    wina.add(username);
+    wina.add(registerButton);
+    wina.open();
+}
+
+var _ = require("alloy/underscore"), User = require("User"), Backbone = require("alloy/backbone"), moment = require("moment");
 
 exports.alert = function(titleid, textid) {
     Ti.UI.createAlertDialog({
@@ -250,3 +355,5 @@ exports.AgendaRow = AgendaRow;
 exports.StatusView = StatusView;
 
 exports.StatusRow = StatusRow;
+
+exports.FBLogin = FBLogin;

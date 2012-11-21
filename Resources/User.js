@@ -72,12 +72,15 @@ User.facebookPost = function(args) {
     });
 };
 
-User.login = function() {
+User.login = function(cb) {
     Cloud.Users.login({
         login: "opolyo01@yahoo.com",
         password: "mysecurepassword"
     }, function(e) {
         e.success ? Ti.API.info("loggedin into ACS") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+        cb.call(this, {
+            status: e.success
+        });
     });
 };
 
@@ -88,6 +91,23 @@ User.update = function(obj, json) {
         fields: json
     }, function(e) {
         e.success ? Ti.API.info("added quiz results") : alert("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+    });
+};
+
+User.getAllUsers = function(cb) {
+    var json;
+    Cloud.Objects.query({
+        classname: "users",
+        page: 1,
+        per_page: 30
+    }, function(e) {
+        if (e.success) {
+            if (e.users.length > 0) {
+                json = e.users;
+                Ti.API.info("Success:\\nCount: " + e.users.length);
+            }
+        } else Ti.API.info("Error:\\n" + (e.error && e.message || JSON.stringify(e)));
+        cb.call(this, json);
     });
 };
 
